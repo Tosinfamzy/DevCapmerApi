@@ -118,7 +118,7 @@ exports.updateBootCamp = async (req, res, next) => {
 // @access  Private
 exports.deleteBootCamp = async (req, res, next) => {
   try {
-    const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+    const bootcamp = await Bootcamp.findByIdAndRemove(req.params.id);
     if (!bootcamp) {
       next(error);
     }
