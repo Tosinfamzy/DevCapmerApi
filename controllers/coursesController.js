@@ -63,3 +63,46 @@ exports.addCourse = async (req, res, next) => {
     }
    
 }
+
+// @desc    Update course
+// @route   PUT /api/v1/courses/:id
+// @access  Private
+exports.updateCourse = async (req, res, next) => {
+    try {
+        let course = await Courses.findById(req.params.id)
+        if (!course) {
+            next(new ErrorResponse('Course does not exist', 404))
+        }
+        course = await Courses.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        })
+        res.status(200).json({
+            success: true,
+            data: course,
+          });
+    } catch (error) {
+        next(error)
+    }
+   
+}
+
+// @desc    Delete course
+// @route   DELETE /api/v1/courses/:id
+// @access  Private
+exports.deleteCourse = async (req, res, next) => {
+    try {
+        let course = await Courses.findById(req.params.id)
+        if (!course) {
+            next(new ErrorResponse('Course does not exist', 404))
+        }
+        await course.remove()
+        res.status(200).json({
+            success: true,
+            data: {},
+          });
+    } catch (error) {
+        next(error)
+    }
+   
+}
