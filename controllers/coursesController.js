@@ -1,5 +1,6 @@
 const ErrorResponse = require("../utils/errorResponse");
 const Courses = require("../models/Courses");
+const Bootcamp = require("../models/bootcamp");
 
 // @desc    Get all courses
 // @route   GET /api/v1/courses
@@ -23,4 +24,42 @@ exports.getCourses = async (req, res, next) => {
         count: courses.length,
         data: courses,
       });
+}
+
+// @desc    Get single course
+// @route   GET /api/v1/course/:courseId
+// @access  Public
+exports.getCourse = async (req, res, next) => {
+    const course = await Courses.findById(req.params.id).populate({
+        path: 'bootcamps',
+        select: 'name description'
+    })
+    if (!course) {
+        next(new ErrorResponse('Course does not exist', 404))
+    }
+    res.status(200).json({
+        success: true,
+        data: course,
+      });
+}
+
+// @desc    Add course
+// @route   POST /api/v1/bootcampId/:bootcampId/courses
+// @access  Public
+exports.addCourse = async (req, res, next) => {
+    try {
+        req.body.bootcamp = req.params.bootcampId
+        const bootcamp = await Bootcamp.findById(req.params.bootcampId)
+        if (!bootcamp) {
+            next(new ErrorResponse('Bootcamp does not exist', 404))
+        }
+        const course = await Courses.create(req.body)
+        res.status(200).json({
+            success: true,
+            data: course,
+          });
+    } catch (error) {
+        next(error)
+    }
+   
 }
