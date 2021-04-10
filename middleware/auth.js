@@ -16,7 +16,7 @@ exports.protect = async (req, res, next) => {
     }
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = User.findById(decided.id);
+      req.user = await User.findById(decoded.id);
       next();
     } catch (error) {
       return next(new ErrorResponse("Not Authorised", 401));
@@ -25,3 +25,17 @@ exports.protect = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.authorize = (...roles) => {
+    return (req, res, next) => {
+      if (!roles.includes(req.user.role)) {
+        return next(
+          new ErrorResponse(
+            `User role ${req.user.role} is not authorised`,
+            403
+          )
+        );
+      }
+      next();
+    };
+  };
