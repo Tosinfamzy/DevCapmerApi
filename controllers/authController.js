@@ -18,10 +18,8 @@ exports.register = async(req, res, next)=>{
           password,
           role,
         });
-    
-        const token = user.getSignedJwtToken()
-    
-        res.status(200).json({success: true, token: token})
+        sendTokenResponse(user, 200, res)
+
     } catch (error) {
         next(error)
     }
@@ -49,11 +47,24 @@ exports.login = async(req, res, next)=>{
         if (!isMatch) {
             next(new ErrorResponse(`User not found`, 401))
         }
-        const token = user.getSignedJwtToken()
-    
-        res.status(200).json({success: true, token: token})
+        sendTokenResponse(user, 200, res)
     } catch (error) {
         next(error)
     }
 
 }
+
+const sendTokenResponse = (user, statusCode, res) => {
+    const token = user.getSignedJwtToken()
+    const options ={
+        expires:new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
+        httpOnly: true
+    }
+
+    res.status(statusCode).cookie('token', token, options).json({
+        success:true,
+        token
+    })
+}
+
+
