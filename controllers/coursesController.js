@@ -73,6 +73,14 @@ exports.updateCourse = async (req, res, next) => {
         if (!course) {
             next(new ErrorResponse('Course does not exist', 404))
         }
+        if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return next(
+              new ErrorResponse(
+                `User is not authorized to update course ${course._id}`,
+                401
+              )
+            );
+          }
         course = await Courses.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true
@@ -96,6 +104,14 @@ exports.deleteCourse = async (req, res, next) => {
         if (!course) {
             next(new ErrorResponse('Course does not exist', 404))
         }
+        if (course.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return next(
+              new ErrorResponse(
+                `User is not authorized to delete course ${course._id}`,
+                401
+              )
+            );
+          }
         await course.remove()
         res.status(200).json({
             success: true,
