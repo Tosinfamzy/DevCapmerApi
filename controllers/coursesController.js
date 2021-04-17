@@ -49,10 +49,19 @@ exports.getCourse = async (req, res, next) => {
 exports.addCourse = async (req, res, next) => {
     try {
         req.body.bootcamp = req.params.bootcampId
+        req.body.user = req.user.id
         const bootcamp = await Bootcamp.findById(req.params.bootcampId)
         if (!bootcamp) {
             next(new ErrorResponse('Bootcamp does not exist', 404))
         }
+        if (bootcamp && req.user.role !== "admin") {
+            return next(
+              new ErrorResponse(
+                `This user not authorised to add a course to this bootcamp`,
+                400
+              )
+            );
+          }
         const course = await Courses.create(req.body)
         res.status(200).json({
             success: true,
