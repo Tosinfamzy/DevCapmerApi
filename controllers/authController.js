@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const ErrorResponse = require('../utils/errorResponse');
 const User = require('../models/User');
+const sendEmail = require('../utils/sendEmail');
 
 
 // @desc      Register user
