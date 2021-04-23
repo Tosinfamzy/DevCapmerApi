@@ -12,7 +12,6 @@ exports.register = async(req, res, next)=>{
     try {
         const { name, email, password, role } = req.body;
 
-        // Create user
         const user = await User.create({
           name,
           email,
@@ -98,12 +97,10 @@ exports.forgotPassword = async(req, res, next)=>{
     return next(new ErrorResponse('There is no user with that email', 404));
   }
 
-  // Get reset token
   const resetToken = user.getResetPasswordToken();
 
   await user.save({ validateBeforeSave: false });
 
-  // Create reset url
   const resetUrl = `${req.protocol}://${req.get(
     'host',
   )}/api/v1/auth/resetpassword/${resetToken}`;
@@ -128,3 +125,45 @@ exports.forgotPassword = async(req, res, next)=>{
     return next(new ErrorResponse('Email could not be sent', 500));
   }
 }
+
+// @desc      Reset password
+// @route     PUT /api/v1/auth/resetpassword/:resettoken
+// @access    Public
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(req.params.resettoken)
+    .digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new ErrorResponse('Invalid token', 400));
+  }
+
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save();
+
+  sendTokenResponse(user, 200, res);
+});
+
+// @desc      Update password
+// @route     PUT /api/v1/auth/updatepassword
+// @access    Private
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+password');
+
+  if (!(await user.matchPassword(req.body.currentPassword))) {
+    return next(new ErrorResponse('Password is incorrect', 401));
+  }
+
+  user.password = req.body.newPassword;
+  await user.save();
+
+  sendTokenResponse(user, 200, res);
+});
