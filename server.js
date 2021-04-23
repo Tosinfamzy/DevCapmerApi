@@ -4,6 +4,10 @@ const morgan = require("morgan");
 const cookieParser = require('cookie-parser')
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/error");
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet");
+const xss = require('xss-clean');
+
 
 dotenv.config({ path: "./config/config.env" });
 
@@ -12,7 +16,8 @@ connectDB();
 //ROUTES
 const bootcamp = require("./routes/bootcamp");
 const courses = require("./routes/courses");
-const auth = require("./routes/auth")
+const auth = require("./routes/auth");
+const expressMongoSanitize = require("express-mongo-sanitize");
 
 const app = express();
 
@@ -22,6 +27,9 @@ app.use(cookieParser())
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+app.use(mongoSanitize());
+app.use(helmet());
+app.use(xss());
 
 app.use("/api/v1/bootcamps", bootcamp);
 app.use("/api/v1/courses", courses);
