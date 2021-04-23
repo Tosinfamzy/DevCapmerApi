@@ -7,6 +7,8 @@ const errorHandler = require("./middleware/error");
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require("helmet");
 const xss = require('xss-clean');
+const rateLimit = require("express-rate-limit");
+const hpp = require('hpp');
 
 
 dotenv.config({ path: "./config/config.env" });
@@ -17,12 +19,17 @@ connectDB();
 const bootcamp = require("./routes/bootcamp");
 const courses = require("./routes/courses");
 const auth = require("./routes/auth");
-const expressMongoSanitize = require("express-mongo-sanitize");
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser())
+app.use(hpp());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 100 
+});
+app.use(limiter);
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
