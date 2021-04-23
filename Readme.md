@@ -91,3 +91,4 @@ Create the backend for a bootcamp directory website.
 - Use cors to make API public (for now)
 
 ## Documentation
+Run ```npm run dev ``` and visit the root eg localhost:5000/

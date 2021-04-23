@@ -6,6 +6,7 @@ const {
   getMe,
   updatePassword,
   resetPassword,
+  forgotPassword,
   logout
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
